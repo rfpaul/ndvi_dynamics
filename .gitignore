@@ -1,2 +1,5 @@
 ndvi_dynamics.Rproj
 .Rproj.user
+.Rhistory
+.RData
+/output

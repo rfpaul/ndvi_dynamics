@@ -1,0 +1,22 @@
+---
+title: "NDVI Peak Dynamics"
+author: "Robert Paul, Jeff Stephens"
+date: "June 23, 2016"
+output: html_document
+---
+# NDVI Peak Dynamics
+
+This workflow detects the length of time for NDVI to go from baseline to peak over the course of the year. Each pixel is classified with a value reflecting the length of time in the year for NDVI to reach peak greenness.
+
+## Load libraries
+```{r load-libraries}
+library(raster)
+library(rgdal)
+```
+
+## Create functions
+```{r functions}
+
+```
+
+## 
