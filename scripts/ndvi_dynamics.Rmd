@@ -10,12 +10,19 @@ This workflow detects the length of time for NDVI to go from baseline to peak ov
 
 Notes:
  * Allow options for baseline-to-peak or baseline-to-baseline
+ * Site: Harvard Forest
+ * UTM Zone 18T
  * Data sources: MODIS (primary), Landsat 8
+ * First year used: 2012
+ * MODIS product: MOD13Q1
+ * MODIS tile: h12v4
 
 ## Load libraries
 ```{r load-libraries}
 library(raster)
 library(rgdal)
+library(rts)
+library(RCurl)
 ```
 
 ## Create functions
@@ -25,7 +32,14 @@ library(rgdal)
 
 ## Load rasters
 ```{r load-rasters}
-
+# Download the data if it's not found
+if(length(dir("/data")) == 0) {
+  setwd("data")
+  # Change this to where MRT is installed 
+  mrt_path <- "/Users/exnihilo/Applications/bin/"
+  ModisDownload(x = 1, h = 12, v = 4, dates=c("2012.01.01", "2012.01.31"), proj=T,proj_type="UTM",utm_zone=18,datum="WGS84", pixel_size=250, MRTpath= mrt_path)
+  setwd("../")
+}
 
 ```
 
@@ -39,7 +53,7 @@ library(rgdal)
 
 ```
 
-## Trace NDVI over the year
+## Trace/describe NDVI over the year
 ```{r track-ndvi}
 
 ```
@@ -54,3 +68,7 @@ library(rgdal)
 
 ```
 
+## Show animation of raster
+```{r animate-changes}
+
+```
