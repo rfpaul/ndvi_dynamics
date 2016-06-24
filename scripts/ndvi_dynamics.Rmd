@@ -34,10 +34,29 @@ library(RCurl)
 ```{r load-rasters}
 # Download the data if it's not found
 if(length(dir("/data")) == 0) {
+  # Move to the data directory
   setwd("data")
-  # Change this to where MRT is installed 
+  # ***Change this to where MRT is installed!
   mrt_path <- "/Users/exnihilo/Applications/bin/"
-  ModisDownload(x = 1, h = 12, v = 4, dates=c("2012.01.01", "2012.01.31"), proj=T,proj_type="UTM",utm_zone=18,datum="WGS84", pixel_size=250, MRTpath= mrt_path)
+  # ***Change to where the MRT application data folder is!
+  Sys.setenv(MRT_DATA_DIR="/Users/exnihilo/Applications/data/")
+  # NDVI and EVI are bands 1 and 2 of 12
+  getBands <- c(1, 1, rep(0, 10))
+  # bands_subset weirdly expects a single string--"1 1 0 0 0..."
+  getBands <- paste(getBands, collapse = " ")
+  # Download MODIS data and reproject it to UTM 18
+  ModisDownload(x = 1,
+                h = 12,
+                v = 4,
+                dates=c("2012.01.01", "2012.12.30"),
+                proj=T,
+                proj_type="UTM",
+                utm_zone=18,
+                datum="WGS84",
+                pixel_size=250,
+                bands_subset = getBands,
+                MRTpath= mrt_path)
+  # Move back to the root working directory
   setwd("../")
 }
 
