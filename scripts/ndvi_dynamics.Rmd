@@ -8,15 +8,73 @@ output: html_document
 
 This workflow detects the length of time for NDVI to go from baseline to peak over the course of the year. Each pixel is classified with a value reflecting the length of time in the year for NDVI to reach peak greenness.
 
+Notes:
+ * Allow options for baseline-to-peak or baseline-to-baseline
+ * Site: Harvard Forest
+ * UTM Zone 18T
+ * Data sources: MODIS (primary), Landsat 8, Phenocam
+ * First year used: 2012
+ * MODIS product: MOD13Q1
+ * MODIS tile: h12v4
+
 ## Load libraries
 ```{r load-libraries}
 library(raster)
 library(rgdal)
+library(rts)
+library(RCurl)
+library(stringr)
 ```
 
 ## Create functions
 ```{r functions}
+# Raster time series pulled from working directory + data/year/index
+make_rts <- function(year = '2012', index = 'ndvi') {
+  # Just in case the year is passed as an integer
+  year <- as.character(year)
+  # **The data directory must be in the current working directory!
+  directory <- paste("data", year, index, "processed", sep='/')
+  # Get the GeoTIFF files
+  files <- list.files(directory, full.names=TRUE, pattern = "*.tif$")
+  # Pull all the files into a raster stack.
+  r <- stack(files)
+  # Extract dates from file names and cast as Date objects
+  dates <- as.Date(str_extract(files, '[0-9]{4}-[0-9]{2}-[0-9]{2}'))
+  # Reference the raster stack with their respective dates and collect them
+  # together into a time series
+  index_ts <- rts(r, dates)
+  # Give the raster time series result
+  return(index_ts)
+}
 
 ```
 
-## 
+## Load rasters
+```{r load-rasters}
+
+# EVI and NDVI files for the year are moved in their own directory
+# e.g. EVI files for 2012 are in data/2012/evi
+# Get the time series
+ndvi_ts <- make_rts(year = "2012", index = "ndvi")
+evi_ts <- make_rts(year = "2012", index = "evi")
+```
+
+## Trace/describe NDVI over the year
+```{r track-ndvi}
+
+```
+
+## Reclassify the raster based on the NDVI dynamics detected
+```{r reclass-based-on-time-series}
+
+```
+
+## Plot the reclassified raster
+```{r plot-result}
+
+```
+
+## Show animation of raster
+```{r animate-changes}
+
+```

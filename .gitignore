@@ -7,3 +7,4 @@ ndvi_dynamics.Rproj
 *.tif
 *.DS_Store
 MODIS.Rproj
+/data
