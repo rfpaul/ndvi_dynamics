@@ -1,0 +1,7 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+*.tif
+*.DS_Store
+MODIS.Rproj
