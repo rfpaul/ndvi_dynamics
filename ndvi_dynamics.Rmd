@@ -1,0 +1,40 @@
+---
+title: "NDVI Peak Dynamics"
+author: "Robert Paul, Jeff Stephens"
+date: "June 23, 2016"
+output: html_document
+---
+# NDVI Peak Dynamics
+
+This workflow detects the length of time for NDVI to go from baseline to peak over the course of the year. Each pixel is classified with a value reflecting the length of time in the year for NDVI to reach peak greenness.
+
+## Load libraries
+```{r load-libraries}
+library(raster)
+library(rgdal)
+library(foreach)
+library(rts)
+library(stringr)
+```
+
+## Create functions
+```{r functions}
+setwd("E:/MODIS/2012/ndvi")
+NDVIstack <- stack(list.files())
+
+plot(NDVIstack[[1]])
+
+#newext <- drawExtent()  # click twice on the map to select the region of interest
+newext <- c(554358, 774977, 4617867, 4761525)
+
+NDVIstack.c <- crop(NDVIstack, newext) # crop NDVI stack
+plot(NDVIstack.c)
+NDVIbrick <- brick(NDVIstack.c)
+
+files <- list.files(full.names=TRUE)
+dates <- as.Date(str_extract(files,'[0-9]{4}-[0-9]{2}-[0-9]{2}'))
+
+NDVIrts <- rts(NDVIbrick, dates)
+NDVIrts
+```
+
