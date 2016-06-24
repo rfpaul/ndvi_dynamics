@@ -15,7 +15,7 @@ library(foreach)
 ## Functions
 
 ```{r functions}
-crop_files_to_extent <- function (path) {
+crop_files_to_extent <- function(path) {
   # UTM Zone 18 coords for area of interest, hard-coded
   modis_ext  <- extent(554358, 774977, 4617867, 4761525)
   # Save current working directory
@@ -26,15 +26,25 @@ crop_files_to_extent <- function (path) {
   
   # Prepare the directory for the processed rasters
   dir.create("processed", showWarnings = FALSE)
+  # List of GeoTIFFs in folder
+  files <- dir(pattern = "*.tif$")
   
   # Get each raster in the path
-  
-  # Crop it
-  
-  # Scale values
-  
-  # Save it
-  
+  foreach(i = 1:length(files))  %do% {
+    # Load file
+    raster <- raster(files[i])
+    # Crop it
+    raster <- crop(raster, modis_ext)
+    # Scale values
+    raster  <- raster * 0.0001
+    # Save it
+    newname <- paste0("processed/proc_", files[i])
+    print(paste("Writing", newname))
+    writeRaster(raster,
+                filename = newname,
+                format = "GTiff",
+                overwrite = TRUE)
+    }
   # Return to original working directory
   setwd(origwd)
 }

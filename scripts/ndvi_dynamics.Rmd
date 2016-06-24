@@ -33,9 +33,9 @@ make_rts <- function(year = '2012', index = 'ndvi') {
   # Just in case the year is passed as an integer
   year <- as.character(year)
   # **The data directory must be in the current working directory!
-  directory <- paste("data", year, index, sep='/')
-  # Get the files
-  files <- list.files(directory, full.names=TRUE)
+  directory <- paste("data", year, index, "processed", sep='/')
+  # Get the GeoTIFF files
+  files <- list.files(directory, full.names=TRUE, pattern = "*.tif$")
   # Pull all the files into a raster stack.
   r <- stack(files)
   # Extract dates from file names and cast as Date objects
@@ -57,11 +57,6 @@ make_rts <- function(year = '2012', index = 'ndvi') {
 # Get the time series
 ndvi_ts <- make_rts(year = "2012", index = "ndvi")
 evi_ts <- make_rts(year = "2012", index = "evi")
-```
-
-## Handle clouds
-```{r handle-clouds}
-
 ```
 
 ## Trace/describe NDVI over the year
