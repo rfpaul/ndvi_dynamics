@@ -3,3 +3,7 @@ ndvi_dynamics.Rproj
 .Rhistory
 .RData
 /output
+.Ruserdata
+*.tif
+*.DS_Store
+MODIS.Rproj
