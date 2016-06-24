@@ -60,6 +60,14 @@ if(length(dir("/data")) == 0) {
   setwd("../")
 }
 
+# EVI and NDVI files for the year are moved in their own directory
+# e.g. EVI files for 2012 are in data/2012/evi
+
+ndvi_files <- list.files("data/2012/ndvi", full.names=TRUE)
+r <- stack(ndvi_files)
+dates <- as.Date(substr(ndvi_files, 16, 25))
+ndvi_ts <- rts(r, dates)
+
 ```
 
 ## Make an ordered time series of the rasters
