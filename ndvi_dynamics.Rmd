@@ -15,6 +15,9 @@ library(rgdal)
 library(foreach)
 library(rts)
 library(stringr)
+library(ggplot2)
+library(rasterVis)  # raster visualisation
+library(maptools)
 ```
 
 ## Create functions
@@ -28,13 +31,33 @@ plot(NDVIstack[[1]])
 newext <- c(554358, 774977, 4617867, 4761525)
 
 NDVIstack.c <- crop(NDVIstack, newext) # crop NDVI stack
-plot(NDVIstack.c)
+
+NDVIcell <- cellStats(NDVIstack.c, mean)
+#plot(NDVIstack.c)
+NDVIscale <- NDVIcell*.0001
+plot(dates, NDVIscale)
 NDVIbrick <- brick(NDVIstack.c)
 
 files <- list.files(full.names=TRUE)
 dates <- as.Date(str_extract(files,'[0-9]{4}-[0-9]{2}-[0-9]{2}'))
 
-NDVIrts <- rts(NDVIbrick, dates)
-NDVIrts
+
+
+
+
+#NDVIrts <- rts(NDVIstack.c, dates)
+#plot(NDVIrts)
+#NDVIrts@time
+
+write.rts(NDVIrts,"NDVIrtsfile")
+
+MeanNDVI <- apply.(NDVIrts,mean)
+plot(MeanNDVI)
+#str(MeanNDVI)
+cellStats(NDVIstack.c, mean)
+install.packages("ggplot2")
+densityplot(MeanNDVI)
+
+
 ```
 
