@@ -6,7 +6,7 @@ output: html_document
 ---
 # NDVI Peak Dynamics
 
-This workflow detects the length of time for NDVI to go from baseline to peak over the course of the year. Each pixel is classified with a value reflecting the length of time in the year for NDVI to reach peak greenness.
+This workflow detects the length of time for NDVI and EVI to go from baseline to peak over the course of the year. Each pixel is classified with a value reflecting the length of time in the year for NDVI and EVI to reach peak greenness.
 
 Notes:
  * Allow options for baseline-to-peak or baseline-to-baseline
@@ -22,7 +22,6 @@ Notes:
 library(raster)
 library(rgdal)
 library(rts)
-library(RCurl)
 library(stringr)
 ```
 
@@ -47,9 +46,33 @@ make_rts <- function(year = '2012', index = 'ndvi') {
   return(index_ts)
 }
 
+days_to_max <- function(ts_max, timepoints) {
+  start_of_year <- as.Date("2012-01-01")
+  # Create an empty raster
+  reclass <- raster(crs = ts_max@crs, # Coordinate Ref Sys
+                         ext = ts_max@extent, # Extent
+                         resolution = res(annual_max_ndvi), # Resolution
+                         vals=NULL) # No values
+  
+  # For each raster in TS...
+  foreach(i = 1:length(timepoints)) %do% {
+    # How many days in?
+    days_since <- as.numeric(timepoints[i] - start_of_year)
+    # Subtract the max from current raster in time series
+    test <- annual_max_ndvi - ndvi_ts[[i]]
+    # Redefine the 0 values as days since beginning of year
+    reclass[test == 0] <- days_since
+  }
+  return(reclass)
+}
+
+annual_stats_raster <- function(modists, FUN) {
+  # We have to use the nested index [[1]] to get the layer itself out of the rts object
+  return(apply.yearly(modists, FUN)[[1]])
+}
 ```
 
-## Load rasters
+## Load raster time series
 ```{r load-rasters}
 
 # EVI and NDVI files for the year are moved in their own directory
@@ -59,19 +82,34 @@ ndvi_ts <- make_rts(year = "2012", index = "ndvi")
 evi_ts <- make_rts(year = "2012", index = "evi")
 ```
 
-## Trace/describe NDVI over the year
-```{r track-ndvi}
+## Trace/describe NDVI & EVI over the year
+```{r stats-ndvi}
+# Get rasters of major statistics for each pixel over the course of the year
+annual_max_ndvi <- annual_stats_raster(ndvi_ts, max)
+annual_min_ndvi <- annual_stats_raster(ndvi_ts, min)
+annual_mean_ndvi <- annual_stats_raster(ndvi_ts, mean)
+annual_sd_ndvi <- annual_stats_raster(ndvi_ts, sd)
+
+annual_max_evi <- annual_stats_raster(evi_ts, max)
+annual_min_evi <- annual_stats_raster(evi_ts, min)
+annual_mean_evi <- annual_stats_raster(evi_ts, mean)
+annual_sd_evi <- annual_stats_raster(evi_ts, sd)
 
 ```
 
-## Reclassify the raster based on the NDVI dynamics detected
+## Reclassify the raster based on how many days it takes to reach max index value
 ```{r reclass-based-on-time-series}
+# These are the timepoints of our series
+timepoints <- index(ndvi_ts@time)
 
+reclass_ndvi <- days_to_max(annual_max_ndvi, timepoints)
+reclass_evi <- days_to_max(annual_max_evi, timepoints)
 ```
 
 ## Plot the reclassified raster
 ```{r plot-result}
-
+plot(reclass_ndvi)
+plot(reclass_evi)
 ```
 
 ## Show animation of raster

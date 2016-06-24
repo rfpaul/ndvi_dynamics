@@ -9,15 +9,14 @@ output: html_document
 ```{r load-libs}
 library(raster)
 library(rgdal)
+library(RCurl)
 library(foreach)
 ```
 
 ## Functions
 
 ```{r functions}
-crop_files_to_extent <- function(path) {
-  # UTM Zone 18 coords for area of interest, hard-coded
-  modis_ext  <- extent(554358, 774977, 4617867, 4761525)
+crop_files_to_extent <- function(path, modis_ext) {
   # Save current working directory
   origwd <- getwd()
   
@@ -89,8 +88,10 @@ if(length(dir("data")) == 0) {
 
 ## Save rasters with cropped extents and scaling-adjusted index values 
 ```{r crop-extents}
-crop_files_to_extent("data/2012/ndvi")
-crop_files_to_extent("data/2012/evi")
+# UTM Zone 18 coords for area of interest, hard-coded
+modis_ext  <- extent(554358, 774977, 4617867, 4761525)
+crop_files_to_extent("data/2012/ndvi", modis_ext)
+crop_files_to_extent("data/2012/evi", modis_ext)
 ```
 
 
