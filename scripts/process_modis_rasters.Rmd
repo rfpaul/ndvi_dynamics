@@ -1,0 +1,86 @@
+---
+title: "Crop and adjust MODIS"
+author: "Robert Paul, Jeff Stephens"
+date: "June 24, 2016"
+output: html_document
+---
+
+## Load libraries
+```{r load-libs}
+library(raster)
+library(rgdal)
+library(foreach)
+```
+
+## Functions
+
+```{r functions}
+crop_files_to_extent <- function (path) {
+  # UTM Zone 18 coords for area of interest, hard-coded
+  modis_ext  <- extent(554358, 774977, 4617867, 4761525)
+  # Save current working directory
+  origwd <- getwd()
+  
+  # Move into path for working directory
+  setwd(path)
+  
+  # Prepare the directory for the processed rasters
+  dir.create("processed", showWarnings = FALSE)
+  
+  # Get each raster in the path
+  
+  # Crop it
+  
+  # Scale values
+  
+  # Save it
+  
+  # Return to original working directory
+  setwd(origwd)
+}
+
+scale_product_values <- function(raster, prod = "ndvi") {
+  if (prod == "ndvi" | prod == "evi") {
+    # Downscale values; MODIS NDVI and EVI need to be multiplied by 0.0001
+    return (raster * 0.001)
+  }
+}
+```
+
+```{r pull-down-data}
+# Download the data if it's not found
+if(length(dir("data")) == 0) {
+  # Move to the data directory
+  setwd("data")
+  # ***Change this to where MRT is installed!
+  mrt_path <- "/Users/exnihilo/Applications/bin/"
+  # ***Change to where the MRT application data folder is!
+  Sys.setenv(MRT_DATA_DIR="/Users/exnihilo/Applications/data/")
+  # NDVI and EVI are bands 1 and 2 of 12
+  getBands <- c(1, 1, rep(0, 10))
+  # bands_subset weirdly expects a single string--"1 1 0 0 0..."
+  getBands <- paste(getBands, collapse = " ")
+  # Download MODIS data and reproject it to UTM 18
+  ModisDownload(x = 1,
+                h = 12,
+                v = 4,
+                dates=c("2012.01.01", "2012.12.30"),
+                proj=T,
+                proj_type="UTM",
+                utm_zone=18,
+                datum="WGS84",
+                pixel_size=250,
+                bands_subset = getBands,
+                MRTpath= mrt_path)
+  # Move back to the root working directory
+  setwd("../")
+}
+```
+
+## Save rasters with cropped extents and scaling-adjusted index values 
+```{r crop-extents}
+crop_files_to_extent("data/2012/ndvi")
+crop_files_to_extent("data/2012/evi")
+```
+
+

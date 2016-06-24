@@ -12,7 +12,7 @@ Notes:
  * Allow options for baseline-to-peak or baseline-to-baseline
  * Site: Harvard Forest
  * UTM Zone 18T
- * Data sources: MODIS (primary), Landsat 8
+ * Data sources: MODIS (primary), Landsat 8, Phenocam
  * First year used: 2012
  * MODIS product: MOD13Q1
  * MODIS tile: h12v4
@@ -23,56 +23,40 @@ library(raster)
 library(rgdal)
 library(rts)
 library(RCurl)
+library(stringr)
 ```
 
 ## Create functions
 ```{r functions}
+# Raster time series pulled from working directory + data/year/index
+make_rts <- function(year = '2012', index = 'ndvi') {
+  # Just in case the year is passed as an integer
+  year <- as.character(year)
+  # **The data directory must be in the current working directory!
+  directory <- paste("data", year, index, sep='/')
+  # Get the files
+  files <- list.files(directory, full.names=TRUE)
+  # Pull all the files into a raster stack.
+  r <- stack(files)
+  # Extract dates from file names and cast as Date objects
+  dates <- as.Date(str_extract(files, '[0-9]{4}-[0-9]{2}-[0-9]{2}'))
+  # Reference the raster stack with their respective dates and collect them
+  # together into a time series
+  index_ts <- rts(r, dates)
+  # Give the raster time series result
+  return(index_ts)
+}
 
 ```
 
 ## Load rasters
 ```{r load-rasters}
-# Download the data if it's not found
-if(length(dir("/data")) == 0) {
-  # Move to the data directory
-  setwd("data")
-  # ***Change this to where MRT is installed!
-  mrt_path <- "/Users/exnihilo/Applications/bin/"
-  # ***Change to where the MRT application data folder is!
-  Sys.setenv(MRT_DATA_DIR="/Users/exnihilo/Applications/data/")
-  # NDVI and EVI are bands 1 and 2 of 12
-  getBands <- c(1, 1, rep(0, 10))
-  # bands_subset weirdly expects a single string--"1 1 0 0 0..."
-  getBands <- paste(getBands, collapse = " ")
-  # Download MODIS data and reproject it to UTM 18
-  ModisDownload(x = 1,
-                h = 12,
-                v = 4,
-                dates=c("2012.01.01", "2012.12.30"),
-                proj=T,
-                proj_type="UTM",
-                utm_zone=18,
-                datum="WGS84",
-                pixel_size=250,
-                bands_subset = getBands,
-                MRTpath= mrt_path)
-  # Move back to the root working directory
-  setwd("../")
-}
 
 # EVI and NDVI files for the year are moved in their own directory
 # e.g. EVI files for 2012 are in data/2012/evi
-
-ndvi_files <- list.files("data/2012/ndvi", full.names=TRUE)
-r <- stack(ndvi_files)
-dates <- as.Date(substr(ndvi_files, 16, 25))
-ndvi_ts <- rts(r, dates)
-
-```
-
-## Make an ordered time series of the rasters
-```{r time-series-stack}
-
+# Get the time series
+ndvi_ts <- make_rts(year = "2012", index = "ndvi")
+evi_ts <- make_rts(year = "2012", index = "evi")
 ```
 
 ## Handle clouds
