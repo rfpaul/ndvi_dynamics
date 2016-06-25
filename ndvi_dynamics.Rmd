@@ -4,11 +4,11 @@ author: "Robert Paul, Jeff Stephens"
 date: "June 23, 2016"
 output: html_document
 ---
-<<<<<<< HEAD
+
 # NDVI Peak Dynamics
 
  This workflow detects the length of time for NDVI to go from baseline to peak over the course of the year. Each pixel is classified with a value reflecting the length of time in the year for NDVI to reach peak greenness.
-=======
+
 # Vegetation Index Peak Dynamics
 
 This workflow detects the length of time for NDVI and EVI to go from baseline to peak over the course of the year. Each pixel is classified with a value reflecting the length of time in the year for NDVI and EVI to reach peak greenness.
