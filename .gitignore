@@ -4,3 +4,4 @@ ndvi_dynamics.Rproj
 .RData
 /output
 /data
+packrat/lib*/
