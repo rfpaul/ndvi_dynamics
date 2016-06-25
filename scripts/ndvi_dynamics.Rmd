@@ -23,6 +23,7 @@ library(raster)
 library(rgdal)
 library(rts)
 library(stringr)
+library(foreach)
 ```
 
 ## Create functions
@@ -74,7 +75,6 @@ annual_stats_raster <- function(modists, FUN) {
 
 ## Load raster time series
 ```{r load-rasters}
-
 # EVI and NDVI files for the year are moved in their own directory
 # e.g. EVI files for 2012 are in data/2012/evi
 # Get the time series

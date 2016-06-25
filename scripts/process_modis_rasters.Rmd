@@ -9,6 +9,7 @@ output: html_document
 ```{r load-libs}
 library(raster)
 library(rgdal)
+library(rts)
 library(RCurl)
 library(foreach)
 ```
@@ -51,51 +52,49 @@ crop_files_to_extent <- function(path, modis_ext) {
 
 ```{r pull-down-data}
 # Download the data if it's not found
-if(length(dir("data")) == 0) {
-  # Move to the data directory
-  setwd("data")
-  # ***Change this to where MRT is installed!
-  mrt_path <- "/Users/exnihilo/Applications/bin/"
-  # ***Change to where the MRT application data folder is!
-  Sys.setenv(MRT_DATA_DIR="/Users/exnihilo/Applications/data/")
-  # NDVI and EVI are bands 1 and 2 of 12
-  getBands <- c(1, 1, rep(0, 10))
-  # bands_subset weirdly expects a single string--"1 1 0 0 0..."
-  getBands <- paste(getBands, collapse = " ")
-  # Download MODIS data and reproject it to UTM 18
-  ModisDownload(x = 1,
-                h = 12,
-                v = 4,
-                dates=c("2013.01.01", "2013.12.30"),
-                proj=T,
-                proj_type="UTM",
-                utm_zone=18,
-                datum="WGS84",
-                pixel_size=250,
-                bands_subset = getBands,
-                MRTpath= mrt_path)
-  
-  # Move files into their respective folders
-  # This would be a candidate for refactoring into a function, but
-  # I just want to get this done.
-  filestocopy <- list.files(pattern="EVI")
-  targetdir <- "2013/evi"
-  file.copy(from=filestocopy,
-            to=targetdir,
-            recursive = FALSE,
-            copy.mode = TRUE)
-  file.remove(filestocopy)
-  
-  filestocopy <- list.files(pattern="NDVI")
-  targetdir <- "2013/ndvi"
-  file.copy(from=filestocopy,
-            to=targetdir,
-            recursive = FALSE,
-            copy.mode = TRUE)
-  file.remove(filestocopy)
-  # Move back to the root working directory
-  setwd("../")
-}
+# Move to the data directory
+setwd("data")
+# ***Change this to where MRT is installed!
+mrt_path <- "/Users/exnihilo/Applications/bin/"
+# ***Change to where the MRT application data folder is!
+Sys.setenv(MRT_DATA_DIR="/Users/exnihilo/Applications/data/")
+# NDVI and EVI are bands 1 and 2 of 12
+getBands <- c(1, 1, rep(0, 10))
+# bands_subset weirdly expects a single string--"1 1 0 0 0..."
+getBands <- paste(getBands, collapse = " ")
+# Download MODIS data and reproject it to UTM 18
+ModisDownload(x = 1,
+              h = 12,
+              v = 4,
+              dates=c("2013.01.01", "2013.12.30"),
+              proj=T,
+              proj_type="UTM",
+              utm_zone=18,
+              datum="WGS84",
+              pixel_size=250,
+              bands_subset = getBands,
+              MRTpath= mrt_path)
+
+# Move files into their respective folders
+# This would be a candidate for refactoring into a function, but
+# I just want to get this done.
+filestocopy <- list.files(pattern="EVI")
+targetdir <- "2013/evi"
+file.copy(from=filestocopy,
+          to=targetdir,
+          recursive = FALSE,
+          copy.mode = TRUE)
+file.remove(filestocopy)
+
+filestocopy <- list.files(pattern="NDVI")
+targetdir <- "2013/ndvi"
+file.copy(from=filestocopy,
+          to=targetdir,
+          recursive = FALSE,
+          copy.mode = TRUE)
+file.remove(filestocopy)
+# Move back to the root working directory
+setwd("../")
 ```
 
 ## Save rasters with cropped extents and scaling-adjusted index values 
