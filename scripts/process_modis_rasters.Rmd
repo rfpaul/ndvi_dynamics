@@ -47,13 +47,6 @@ crop_files_to_extent <- function(path, modis_ext) {
   # Return to original working directory
   setwd(origwd)
 }
-
-scale_product_values <- function(raster, prod = "ndvi") {
-  if (prod == "ndvi" | prod == "evi") {
-    # Downscale values; MODIS NDVI and EVI need to be multiplied by 0.0001
-    return (raster * 0.001)
-  }
-}
 ```
 
 ```{r pull-down-data}
@@ -73,7 +66,7 @@ if(length(dir("data")) == 0) {
   ModisDownload(x = 1,
                 h = 12,
                 v = 4,
-                dates=c("2012.01.01", "2012.12.30"),
+                dates=c("2013.01.01", "2013.12.30"),
                 proj=T,
                 proj_type="UTM",
                 utm_zone=18,
@@ -81,6 +74,25 @@ if(length(dir("data")) == 0) {
                 pixel_size=250,
                 bands_subset = getBands,
                 MRTpath= mrt_path)
+  
+  # Move files into their respective folders
+  # This would be a candidate for refactoring into a function, but
+  # I just want to get this done.
+  filestocopy <- list.files(pattern="EVI")
+  targetdir <- "2013/evi"
+  file.copy(from=filestocopy,
+            to=targetdir,
+            recursive = FALSE,
+            copy.mode = TRUE)
+  file.remove(filestocopy)
+  
+  filestocopy <- list.files(pattern="NDVI")
+  targetdir <- "2013/ndvi"
+  file.copy(from=filestocopy,
+            to=targetdir,
+            recursive = FALSE,
+            copy.mode = TRUE)
+  file.remove(filestocopy)
   # Move back to the root working directory
   setwd("../")
 }
@@ -90,8 +102,8 @@ if(length(dir("data")) == 0) {
 ```{r crop-extents}
 # UTM Zone 18 coords for area of interest, hard-coded
 modis_ext  <- extent(554358, 774977, 4617867, 4761525)
-crop_files_to_extent("data/2012/ndvi", modis_ext)
-crop_files_to_extent("data/2012/evi", modis_ext)
+crop_files_to_extent("data/2013/ndvi", modis_ext)
+crop_files_to_extent("data/2013/evi", modis_ext)
 ```
 
 

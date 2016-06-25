@@ -4,16 +4,16 @@ author: "Robert Paul, Jeff Stephens"
 date: "June 23, 2016"
 output: html_document
 ---
-# NDVI Peak Dynamics
+# Vegetation Index Peak Dynamics
 
 This workflow detects the length of time for NDVI and EVI to go from baseline to peak over the course of the year. Each pixel is classified with a value reflecting the length of time in the year for NDVI and EVI to reach peak greenness.
 
 Notes:
- * Allow options for baseline-to-peak or baseline-to-baseline
- * Site: Harvard Forest
+ * For fancier analyses, check out the brief paper "Monitoring vegetation phenology using MODIS" (Zhang et al. 2002) doi:10.1016/S0034-4257(02)00135-9
+ * Site: Region 01, including Harvard Forest
  * UTM Zone 18T
- * Data sources: MODIS (primary), Landsat 8, Phenocam
- * First year used: 2012
+ * Data source: MODIS
+ * Years used: 2012, 2013
  * MODIS product: MOD13Q1
  * MODIS tile: h12v4
 
@@ -46,20 +46,20 @@ make_rts <- function(year = '2012', index = 'ndvi') {
   return(index_ts)
 }
 
-days_to_max <- function(ts_max, timepoints) {
-  start_of_year <- as.Date("2012-01-01")
+days_to_max <- function(modists, ts_max, timepoints) {
+  start_of_year <- timepoints[1]
   # Create an empty raster
   reclass <- raster(crs = ts_max@crs, # Coordinate Ref Sys
                          ext = ts_max@extent, # Extent
-                         resolution = res(annual_max_ndvi), # Resolution
-                         vals=NULL) # No values
+                         resolution = res(ts_max), # Resolution
+                         vals=NA) # Fill as NAs
   
   # For each raster in TS...
   foreach(i = 1:length(timepoints)) %do% {
     # How many days in?
     days_since <- as.numeric(timepoints[i] - start_of_year)
     # Subtract the max from current raster in time series
-    test <- annual_max_ndvi - ndvi_ts[[i]]
+    test <- ts_max - modists[[i]]
     # Redefine the 0 values as days since beginning of year
     reclass[test == 0] <- days_since
   }
@@ -84,17 +84,17 @@ evi_ts <- make_rts(year = "2012", index = "evi")
 
 ## Trace/describe NDVI & EVI over the year
 ```{r stats-ndvi}
-# Get rasters of major statistics for each pixel over the course of the year
+# Get rasters of statistics for each pixel over the course of the year
 annual_max_ndvi <- annual_stats_raster(ndvi_ts, max)
-annual_min_ndvi <- annual_stats_raster(ndvi_ts, min)
-annual_mean_ndvi <- annual_stats_raster(ndvi_ts, mean)
 annual_sd_ndvi <- annual_stats_raster(ndvi_ts, sd)
 
-annual_max_evi <- annual_stats_raster(evi_ts, max)
-annual_min_evi <- annual_stats_raster(evi_ts, min)
-annual_mean_evi <- annual_stats_raster(evi_ts, mean)
-annual_sd_evi <- annual_stats_raster(evi_ts, sd)
+# Coefficient of variance calculation
+# -- not working...?
+#coeff_var <- function(x) sd(x)/mean(x)
+#coeff_var_ndvi <- annual_stats_raster(ndvi_ts, coeff_var)
 
+annual_max_evi <- annual_stats_raster(evi_ts, max)
+annual_sd_evi <- annual_stats_raster(evi_ts, sd)
 ```
 
 ## Reclassify the raster based on how many days it takes to reach max index value
@@ -102,17 +102,26 @@ annual_sd_evi <- annual_stats_raster(evi_ts, sd)
 # These are the timepoints of our series
 timepoints <- index(ndvi_ts@time)
 
-reclass_ndvi <- days_to_max(annual_max_ndvi, timepoints)
-reclass_evi <- days_to_max(annual_max_evi, timepoints)
+reclass_ndvi <- days_to_max(ndvi_ts, annual_max_ndvi, timepoints)
+reclass_evi <- days_to_max(evi_ts, annual_max_evi, timepoints)
 ```
 
-## Plot the reclassified raster
+## Plot the time series (multiplot), SD results, and reclassified rasters
 ```{r plot-result}
-plot(reclass_ndvi)
-plot(reclass_evi)
-```
+colors <- rainbow(n = 300, s = 1, v = .8, start = .666, end = .333)
 
-## Show animation of raster
-```{r animate-changes}
-
+plot(ndvi_ts,
+     main = "2012 MODIS")
+plot(annual_sd_ndvi,
+     main = "2012 MODIS NDVI\nStandard Deviation for the Year",
+     col = colors)
+plot(reclass_ndvi,
+     main = "2012 MODIS NDVI\nDays to Reach Maximum NDVI",
+     col = colors
+plot(reclass_evi,
+     main = "2012 MODIS EVI\nStandard Deviation for the Year",
+     col = colors)
+plot(reclass_ndvi,
+     main = "2012 MODIS NDVI\nDays to Reach Maximum NDVI",
+     col = colors)
 ```
