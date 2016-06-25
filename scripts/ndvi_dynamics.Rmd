@@ -106,22 +106,39 @@ reclass_ndvi <- days_to_max(ndvi_ts, annual_max_ndvi, timepoints)
 reclass_evi <- days_to_max(evi_ts, annual_max_evi, timepoints)
 ```
 
-## Plot the time series (multiplot), SD results, and reclassified rasters
+## Plot the time series (multiplot), mean curve, SD results, and reclassified rasters for NDVI and EVI
 ```{r plot-result}
-colors <- rainbow(n = 300, s = 1, v = .8, start = .666, end = .333)
+colors <- rev(rainbow(n = 300, s = 1, v = .7, start = .333, end = .8))
 
 plot(ndvi_ts,
-     main = "2012 MODIS")
+     col=colors)
+plot(evi_ts,
+     col=colors)
+
+plot(x = timepoints,
+     y = cellStats(ndvi_ts@raster, mean),
+     main = "2012 MODIS Raster Tiles\nMean NDVI Value Over Time",
+     type='o',
+     xlab = "month",
+     ylab = "mean NDVI")
+plot(x = timepoints,
+     y = cellStats(evi_ts@raster, mean),
+     main = "2012 MODIS Raster Tiles\nMean EVI Value Over Time",
+     type='o',
+     xlab = "month",
+     ylab = "mean EVI")
+
 plot(annual_sd_ndvi,
      main = "2012 MODIS NDVI\nStandard Deviation for the Year",
      col = colors)
 plot(reclass_ndvi,
      main = "2012 MODIS NDVI\nDays to Reach Maximum NDVI",
      col = colors
-plot(reclass_evi,
+
+plot(annual_sd_evi,
      main = "2012 MODIS EVI\nStandard Deviation for the Year",
      col = colors)
-plot(reclass_ndvi,
-     main = "2012 MODIS NDVI\nDays to Reach Maximum NDVI",
+plot(reclass_evi,
+     main = "2012 MODIS EVI\nDays to Reach Maximum EVI",
      col = colors)
 ```
